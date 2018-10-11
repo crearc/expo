@@ -65,7 +65,13 @@ async function _openAuthSessionPolyfillAsync(
   }
 
   try {
-    return await Promise.race([openBrowserAsync(startUrl), _waitForRedirectAsync(returnUrl)]);
+    // return await Promise.race([openBrowserAsync(startUrl), _waitForRedirectAsync(returnUrl)]);
+    const promises = [openBrowserAsync(startUrl), _waitForRedirectAsync(returnUrl)];
+    return new Promise<AuthSessionResult>(function (fulfil, reject) {
+      promises.forEach( function ( promise: Promise<AuthSessionResult> ) {
+        promise.then(fulfil, reject);
+      });
+    });
   } finally {
     dismissBrowser();
     if (!_redirectHandler) {
